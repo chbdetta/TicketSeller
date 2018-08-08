@@ -128,7 +128,6 @@ console.log(database);
 
 function buyTickets(size = 1) {
   // try to get the ticket that is conjunction
-  const tickets = [];
   let blocks = [];
   database.forEach(section => {
     section.rows.forEach(row => {
@@ -139,7 +138,16 @@ function buyTickets(size = 1) {
   const block = blocks[Math.round(Math.random() * blocks.length)];
   block.takeSeats(Math.round(Math.random() * (block.length - size)), size);
 
-  return block;
+  const tickets = [];
+  for (let i = 0; i < block.length; i++) {
+    tickets.push({
+      row: block.row.row,
+      column: block.start + i,
+      section: block.row.section.name
+    });
+  }
+
+  return tickets;
 }
 
 function draw() {
@@ -152,6 +160,11 @@ function draw() {
     sectionDom.classList.add("section");
     sectionDom.id = section.name;
 
+    const sectionName = document.createElement("div");
+    sectionName.classList.add("name");
+    sectionName.innerHTML = section.name;
+
+    sectionDom.appendChild(sectionName);
     container.appendChild(sectionDom);
 
     section.rows.forEach(row => {
@@ -177,9 +190,25 @@ function draw() {
   });
 }
 
+const logsDom = document.getElementById("logs");
+function log(tickets) {
+  const logDom = document.createElement("p");
+  logDom.classList.add("log");
+  logDom.innerHTML =
+    `${tickets.length}张票：` +
+    tickets.reduce((accu, ticket) => {
+      return (
+        accu + `(${ticket.section}区, ${ticket.row}排, ${ticket.column}列), `
+      );
+    }, "");
+  logsDom.appendChild(logDom);
+}
+
 draw();
 
 document.getElementById("sell").addEventListener("click", () => {
-  buyTickets(Math.ceil(Math.random() * 5));
+  const tickets = buyTickets(Math.ceil(Math.random() * 5));
+  log(tickets);
   draw();
+  console.log(tickets);
 });
